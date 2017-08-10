@@ -16,20 +16,19 @@ api = tweepy.API(auth)
 #tweet = 'hola\nsoy\nun\nbot\nde\n#poesíapueril'
 #api.update_status(status=tweet)
 
-for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
-    try:
-        #Add \n escape character to print() to organize tweets
-        print('\Tweet by @' + tweet.user.screen_name)
+while True:
+    for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
+        try:
+            #Add \n escape character to print() to organize tweets
+            print('\Tweet by @' + tweet.user.screen_name)
 
-        #Retweets tweets as they are found
-        tweet.retweet()
-        print('Retweeted the tweet')
+            #Retweets tweets as they are found
+            tweet.retweet()
+            print('Retweeted the tweet')
 
-        sleep(300)
+            sleep(1800)
 
-    except tweepy.TweepError as e:
-        print(e.reason)
-
-    except StopIteration:
-        break
+        except tweepy.TweepError as e:
+            print(e.reason)
+    sleep(1800)
 
