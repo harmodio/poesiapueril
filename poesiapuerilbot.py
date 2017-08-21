@@ -31,4 +31,3 @@ while True:
         except tweepy.TweepError as e:
             print(e.reason)
     sleep(1800)
-
