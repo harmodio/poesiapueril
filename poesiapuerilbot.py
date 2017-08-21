@@ -30,7 +30,7 @@ while True:
 
         except tweepy.TweepError as e:
             print(e.reason)
-            if e.value==185:	
+            if e.message[0]['code']==185:	
             	#Catching 'User is over daily status limit' error: we will wait
                 print('Sleeping over a 185 error: User is over daily status limit')
                 sleep(1800)
