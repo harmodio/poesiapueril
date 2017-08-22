@@ -1,6 +1,27 @@
-import tweepy
-from time import sleep
+#/usr/bin/env python3
+# -*- coding: utf8 -*-
+##
+## Copyright (c) 2017 Jorge Harmodio
 
+##     poesiapuerilbot is free software: you can redistribute it and/or modify
+##     it under the terms of the GNU General Public License as published by
+##     the Free Software Foundation, either version 3 of the License, or
+##     (at your option) any later version.
+
+##     poesiapuerilbot is distributed in the hope that it will be useful,
+##     but WITHOUT ANY WARRANTY; without even the implied warranty of
+##     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##     GNU General Public License for more details.
+
+##     You should have received a copy of the GNU General Public License
+##     along with Unoporuno.  If not, see <http://www.gnu.org/licenses/>.
+
+
+import tweepy
+import time
+#from time import sleep
+
+import logging
 #Create variables for each key, secret, token
 consumer_key = 'PzwW4qupC1qy3562g2wtCfMV1'
 consumer_secret = 'wCivK4jYECDUbJCQBn9294EtGsYAgk2Z5V8wyLFM31tNjqNypW'
@@ -15,24 +36,31 @@ api = tweepy.API(auth)
 #Write a tweet to push to our @poesiapueril account
 #tweet = 'hola\nsoy\nun\nbot\nde\n#poesíapueril'
 #api.update_status(status=tweet)
+logging.basicConfig(level=logging.INFO)
+logging.info("Starting execution of poesiapuerilbot on " + time.asctime())
+       
+
 
 while True:
     for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
         try:
             #Add \n escape character to print() to organize tweets
-            print('\Tweet by @' + tweet.user.screen_name)
+            logging.info('\Tweet by @' + tweet.user.screen_name)
 
             #Retweets tweets as they are found
             tweet.retweet()
-            print('Retweeted the tweet')
+            logging.info('Retweeted the tweet:ready to sleep')
 
-            sleep(1800)
+            time.sleep(1800)
 
         except tweepy.TweepError as e:
-            print(e.reason)
-            if e.message[0]['code']==185:
-                print('Sleeping over a 185 error: User is over daily status limit')
+            logging.error(str(e.reason))
+            if e.args[0][0]['code']==185:
+                logging.info('Sleeping over a 185 error: User is over daily status limit')
                 #Catching 'User is over daily status limit' error: we will wait
-                sleep(1800)
+                time.sleep(1800)
+            elif e.args[0][0]['code']==327:
+                logging.error('Repeated tweet')
+                
      #end of the for: sleep 30min
-    sleep(1800)
+    time.sleep(1800)
