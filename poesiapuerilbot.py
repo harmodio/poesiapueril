@@ -28,10 +28,6 @@ consumer_secret = 'wCivK4jYECDUbJCQBn9294EtGsYAgk2Z5V8wyLFM31tNjqNypW'
 access_token = '869611298547421184-PfE7owxRC1RLC7bgzp14jdjvCcyjpyV'
 access_token_secret = 'aU4r2FCuZtU5d6tR1LbfAbXb0r7MlcejbEso7OlSax7jI'
  
-#Setup OAuth and integrate with API 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
 
 #Write a tweet to push to our @poesiapueril account
 #tweet = 'hola\nsoy\nun\nbot\nde\n#poesíapueril'
@@ -42,25 +38,34 @@ logging.info("Starting execution of poesiapuerilbot on " + time.asctime())
 
 
 while True:
-    for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
-        try:
-            #Add \n escape character to print() to organize tweets
-            logging.info('\Tweet by @' + tweet.user.screen_name)
+    #Setup OAuth and integrate with API 
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth)
 
-            #Retweets tweets as they are found
-            tweet.retweet()
-            logging.info('Retweeted the tweet:ready to sleep')
+    try:
 
-            time.sleep(1800)
+        for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
+            try:
+                #Add \n escape character to print() to organize tweets
+                logging.info('\Tweet by @' + tweet.user.screen_name)
 
-        except tweepy.TweepError as e:
-            logging.error(str(e.reason))
-            if e.args[0][0]['code']==185:
-                logging.info('Sleeping over a 185 error: User is over daily status limit')
-                #Catching 'User is over daily status limit' error: we will wait
+                #Retweets tweets as they are found
+                tweet.retweet()
+                logging.info('Retweeted the tweet:ready to sleep')
+
                 time.sleep(1800)
-            elif e.args[0][0]['code']==327:
-                logging.error('Repeated tweet')
-                
-     #end of the for: sleep 30min
-    time.sleep(1800)
+
+            except tweepy.TweepError as e:
+                logging.error(str(e.reason))
+                if e.args[0][0]['code']==185:
+                    logging.info('Sleeping over a 185 error: User is over daily status limit')
+                    #Catching 'User is over daily status limit' error: we will wait
+                    time.sleep(1800)
+                elif e.args[0][0]['code']==327:
+                    logging.error('Repeated tweet')
+
+         #end of the for: sleep 30min
+        time.sleep(1800)
+    except IOError as ex:
+        logging.error(str(ex))
