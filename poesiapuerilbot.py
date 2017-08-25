@@ -19,6 +19,7 @@
 
 import tweepy
 import time
+import urllib3
 #from time import sleep
 
 import logging
@@ -35,27 +36,35 @@ access_token_secret = 'aU4r2FCuZtU5d6tR1LbfAbXb0r7MlcejbEso7OlSax7jI'
 logging.basicConfig(level=logging.INFO)
 logging.info("Starting execution of poesiapuerilbot on " + time.asctime())
        
-
-
+#todo: repeated_tweet check must be done with a database
+repeated_tweets = []
 while True:
     #Setup OAuth and integrate with API 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
-
+    tweets = []
     try:
-
         for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
+            tweets.append(tweet)
+        for tweet in tweepy.Cursor(api.search, q="poesía pueril").items():
+            tweets.append(tweet)
+        logging.info("Trying to retweet a list of " + str(len(tweets)) + " tweets")
+        for tweet in tweets:
             try:
                 #Add \n escape character to print() to organize tweets
                 logging.info('\Tweet by @' + tweet.user.screen_name)
-
-                #Retweets tweets as they are found
-                tweet.retweet()
-                logging.info('Retweeted the tweet:ready to sleep')
-
-                time.sleep(1800)
-
+                
+                #Retweets tweets as they are found if different from @poesiapueril
+                if tweet.user.screen_name=="poesiapueril":
+                    logging.info('My tweet: excluded')
+                elif tweet in repeated_tweets:
+                    logging.info('I already tweeted that one')
+                else:
+                    tweet.retweet()
+                    logging.info('Retweeted the tweet:ready to sleep')
+                    time.sleep(1800)
+                    
             except tweepy.TweepError as e:
                 logging.error(str(e.reason))
                 if e.args[0][0]['code']==185:
@@ -63,9 +72,14 @@ while True:
                     #Catching 'User is over daily status limit' error: we will wait
                     time.sleep(1800)
                 elif e.args[0][0]['code']==327:
+                    repeated_tweets.append(tweet)
                     logging.error('Repeated tweet')
 
          #end of the for: sleep 30min
         time.sleep(1800)
-    except IOError as ex:
-        logging.error(str(ex))
+    except urllib3.exceptions.ProtocolError as err:
+        logging.error(str(err))
+    except ConnectionResetError as err:
+        logging.error(str(err))
+    except OSError as err:
+        logging.error(str(err))
