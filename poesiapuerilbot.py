@@ -47,7 +47,7 @@ while True:
     try:
         for tweet in tweepy.Cursor(api.search, q='#poesíapueril').items():
             tweets.append(tweet)
-        for tweet in tweepy.Cursor(api.search, q="poesía pueril").items():
+        for tweet in tweepy.Cursor(api.search, q='"poesía pueril"').items():
             tweets.append(tweet)
         logging.info("Trying to retweet a list of " + str(len(tweets)) + " tweets")
         for tweet in tweets:
